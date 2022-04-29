@@ -21,11 +21,11 @@ module.exports = app => {
         sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
-        maxAge: 60000
+        maxAge: 1000 * 60 * 60
       },
       store: MongoStore.create({
         mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost/characters-crud',
-        ttl: 60 * 60 // 60sec * 60min * 24h => 1 day
+        ttl: 60 * 60 // 60sec * 60min => 1 hour
       })
     })
   );

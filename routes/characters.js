@@ -1,21 +1,26 @@
 const router = require("express").Router();
 const Character = require("../models/Character.model");
+const axios = require("axios");
+
+
+const ApiService = require("../services/api.service");
+const apiService = new ApiService();
+
 
 router.get("/", (req, res, next) => {
-  Character.find()
-    .then( charactersFromDB => {
-      res.render("characters/characters-list", {characters: charactersFromDB});
+  apiService
+    .getAllCharacters()
+    .then(charactersFromApi => {
+      res.render("characters/characters-list", {characters: charactersFromApi.data})
     })
     .catch(err => {
-      console.log('Error getting characters from DB...', err);
-    })
+          console.log('Error getting characters from API...', err);
+        })
 });
-
 
 router.get("/create", (req, res, next) => {
   res.render("characters/character-create");
 });
-
 
 router.post('/create', (req, res, next) => {
 
@@ -25,63 +30,73 @@ router.post('/create', (req, res, next) => {
     weapon: req.body.weapon,
   }
 
-  Character.create(characterDetails)
-    .then( character => {
+
+  apiService
+    .createCharacter(characterDetails)
+    .then(() => {
       res.redirect("/characters");
     })
-    .catch( err => {
-      console.log('Error creating new character...', err);
-    })
+    .catch((err) => {
+      console.log("Error creating new character...", err);
+    });
 })
 
-
 router.get("/:characterId", (req, res, next) => {
-  Character.findById(req.params.characterId)
-    .then( character => {
-      res.render("characters/character-details", character);
+  let id = req.params.characterId;
+
+  apiService
+    .getOneCharacter(id)
+    .then(character => {
+      res.render("characters/character-details", character.data)
     })
-    .catch();
+    .catch(error => {
+      console.log("Error getting the character details from the database", error);
+      next(error);
+    });
+  
 });
 
-
 router.get("/:characterId/edit", (req, res, next) => {
-  Character.findById(req.params.characterId)
-    .then( (characterDetails) => {
-      res.render("characters/character-edit", characterDetails);
+
+  const id = req.params.characterId;
+
+
+  apiService
+    .getOneCharacter(id)
+    .then(characterFromApi => {
+      res.render("characters/character-edit", characterFromApi.data);
     })
-    .catch( err => {
-      console.log("Error getting character details from DB...", err);
+    .catch((err) => {
+      console.log("Error editing character...", err);
     });
 });
 
 router.post("/:characterId/edit", (req, res, next) => {
-  const characterId = req.params.characterId;
+  const id = req.params.characterId;
+  const newDetails = req.body;
 
-  const newDetails = {
-    name: req.body.name,
-    occupation: req.body.occupation,
-    weapon: req.body.weapon,
-  }
-
-  Character.findByIdAndUpdate(characterId, newDetails)
-    .then( () => {
-      res.redirect(`/characters/${characterId}`);
+  apiService
+    .editCharacter(id, newDetails)
+    .then(() => {
+      res.redirect("/characters");
     })
-    .catch( err => {
+    .catch((err) => {
       console.log("Error updating character...", err);
     });
 });
 
-
 router.post("/:characterId/delete", (req, res, next) => {
-  Character.findByIdAndDelete(req.params.characterId)
-    .then(() => {
+  const id = req.params.characterId;
+
+  apiService
+    .deleteCharacter(id)
+    .then((response) => {
       res.redirect("/characters");
     })
-    .catch(err => {
+    .catch((err) => {
       console.log("Error deleting character...", err);
     });
-
 });
+
 
 module.exports = router;

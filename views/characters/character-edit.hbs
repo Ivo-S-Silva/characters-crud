@@ -1,16 +1,16 @@
-<h2>Edit the character: {{title}}</h2>
+<h2>Edit the character: {{this.name}}</h2>
 
-<form action="/characters/{{_id}}/edit" method="post">
+<form action="/characters/{{this.id}}/edit" method="post">
   <label> Name:
-    <input type="text" name="title" value="{{name}}" />
+    <input type="text" name="name" value="{{this.name}}" />
   </label>
 
   <label> Occupation:
-    <input type="text" name="title" value="{{occupation}}" />
+    <input type="text" name="occupation" value="{{this.occupation}}" />
   </label>
 
   <label> Weapon:
-    <input type="text" name="title" value="{{weapon}}" />
+    <input type="text" name="weapon" value="{{this.weapon}}" />
   </label>
 
   <button>Save changes</button>
